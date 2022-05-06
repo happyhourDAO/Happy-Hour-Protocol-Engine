@@ -83,7 +83,7 @@ interface IDRNKtoken {
     function mintDRNK(address to, uint amount) external;
 }
 
-/* Main Happy Hour Protocol Engine Contract */
+/* Main Happy Hour Protocol v2 Engine Contract */
 
 contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
 
