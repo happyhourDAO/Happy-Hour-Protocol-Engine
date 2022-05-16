@@ -87,7 +87,7 @@ interface IDRNKtoken {
 
 contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
 
-    uint happyHourFee = 1 ether;
+    uint happyHourFee = 1;
     uint happyHourFeePool;
     uint timeIN;
     uint timeOUT;
@@ -198,7 +198,7 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
         }
 
         require(validPDE == 1);
-        require(msg.value == happyHourFee, "Invalid Happy Hour Fee.");
+        require(msg.value == happyHourFee * (10 ** 16), "Invalid Happy Hour Fee.");
         givePoolDrinkingId();
         drinkingIDtoPDEid[drinkingID[msg.sender]] = _PDEid;
         happyHourFeePool += 1;
@@ -227,8 +227,8 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
 
         nullPoolDrinkingId();
         happyHourFeePool -= 1;
-        wiped.transfer(1 ether);
-        hoursSpentDrinking = (timeOUT - timeIN) / 60 / 60;
+        wiped.transfer(happyHourFee * (10 ** 16));
+        hoursSpentDrinking = (timeOUT - timeIN) / 60;
         uint HOURearned = hoursSpentDrinking * HOURperhour;
         uint PDEcommissionEarned = HOURearned / PDEcommissionRate;
         _mint(wiped, HOURearned);
