@@ -19,5 +19,13 @@
   "bugs": {
     "url": "https://github.com/happyhourDAO/Happy-Hour-Protocol-Engine/issues"
   },
-  "homepage": "https://github.com/happyhourDAO/Happy-Hour-Protocol-Engine#readme"
+  "homepage": "https://github.com/happyhourDAO/Happy-Hour-Protocol-Engine#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.0",
+    "@truffle/hdwallet-provider": "^2.1.1",
+    "chai": "^4.3.7"
+  },
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.16"
+  }
 }
