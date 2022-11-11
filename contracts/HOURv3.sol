@@ -2,85 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-/* import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol';
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol'; */
-
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-
-/* For whitelisting, if implemented. */
-
-contract WhitelistID {
-
-    mapping(address => uint256) public whitelistID;
-    address[] public whiteListers;
-    uint256 idcounter;
-
-    event createdId(address user, uint256 id);
-
-    function giveWhitelistId() internal returns (uint256)  { 
-        require(whitelistID[msg.sender]==0, "You are already whitelisted.");
-        idcounter += 1;
-        whiteListers.push(msg.sender);
-        whitelistID[msg.sender] = idcounter;
-        emit createdId(msg.sender,idcounter);
-        return idcounter;
-    }
-
-}
-
-/* Each Drinker is designated an ID in order to keep track of current hours accumulated per Drinker during 1 session. */
-
-contract poolDrinkingID {
-
-    mapping(address => uint256) public drinkingID;
-    uint256 drinkingIDcounter;
-
-    event createdDrinkingID(address user, uint256 id);
-
-    function givePoolDrinkingId() internal returns (uint256)  { 
-        require(drinkingID[msg.sender]==0, "You are already drinking.");
-        drinkingIDcounter += 1;
-        drinkingID[msg.sender] = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender)));
-        emit createdDrinkingID(msg.sender,drinkingID[msg.sender]);
-        return drinkingID[msg.sender];
-    }
-
-    function nullPoolDrinkingId() internal {
-        require(drinkingID[msg.sender] != 0, "You haven't started drinking yet.");
-        drinkingIDcounter -= 1;
-        drinkingID[msg.sender] = 0;
-    }
-
-    function getPoolDrinkingId() public view returns(uint256) {
-        return drinkingID[msg.sender];
-    }
-
-    function getNumberOfCurrentDrinkers() public view returns(uint) {
-        return drinkingIDcounter;
-    }
-}
-
-/* $DRNK governance token contract */
-
-contract DRNKgovernance is ERC20, Ownable {
-
-    address public _admin;
-
-    constructor() ERC20('Drunk Governance Token', 'DRNK') {
-        _mint(msg.sender, 1 * (10 ** 18));
-        _admin = msg.sender;
-    }
-
-    function mintDRNK(address to, uint amount) external {
-        _mint(to, amount);
-    }
-
-    function burnDRNK(uint amount) external {
-        _burn(msg.sender, amount * (10 ** 18));
-    }
-
-}
+import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol';
+import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol';
 
 interface IDRNKtoken {
     function mintDRNK(address to, uint amount) external;
@@ -88,7 +11,7 @@ interface IDRNKtoken {
 
 /* Main Happy Hour Protocol v2 Engine Contract */
 
-contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
+contract HappyHourProtocolv3 is ERC20, Ownable {
 
     uint happyHourFee = 1;
     uint happyHourFeePool;
@@ -96,12 +19,11 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
     uint timeOUT;
     uint hoursSpentDrinking;
     uint HOUR2DRNKburnMinimum = 2000 * (10 ** 18);
-    uint secretCodeWhitelist = 989;
     uint PDEcommissionRate = 10;
     uint HOURperhour = 100;
 
     event endHOURresults(uint hoursSpentDrinking, uint HOURearned, uint PDEcommissionEarned);
-    event newPDEonboarded(string _name, string _location, address indexed _address, uint _PDEid, uint PDEindexNum, uint accessCode);
+    event newPDEonboarded(string _name, string _location, address _address, uint _PDEid, uint PDEindexNum, uint accessCode);
     event newDRNKminted(uint HOURburned, uint DRNKminted);
 
     address public _admin;
@@ -121,7 +43,7 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
 
     /* Initializing the HappyHourProtocolv2 contract */
 
-    constructor() ERC20('Happy Hour v2', 'HOUR') {
+    constructor() ERC20('Happy Hour Token v3', 'HOUR') {
         _mint(msg.sender, 1 * (10 ** 18));
         _admin = msg.sender;
     }
@@ -154,10 +76,9 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
     function mintyDRNK(address _DRNKaddress, address to, uint _burnAmount) public {
         require((_burnAmount * (10 ** 18)) >= HOUR2DRNKburnMinimum, "Insufficient amount of HOUR tokens to burn.");
         uint DRNKneeded2mint = (_burnAmount * (10 ** 18)) / 10;
-        uint mintedDRNKemit = DRNKneeded2mint / (10 ** 18);
         burnHOUR(_burnAmount);
         IDRNKtoken(_DRNKaddress).mintDRNK(to, DRNKneeded2mint);
-        emit newDRNKminted(_burnAmount, mintedDRNKemit);
+        emit newDRNKminted(_burnAmount, DRNKneeded2mint);
     }
 
     /* mintHOUR and burnHOUR functions will not be public */
@@ -170,23 +91,39 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
         _burn(msg.sender, amount * (10 ** 18));
     }
 
-    /* Whitelisting will not be available. */
-
-    function adjustsecretCodeWhitelist(uint _newSecretCode) external onlyOwner {
-        secretCodeWhitelist = _newSecretCode;
-    }
-
-    function whitelist(address _whitelister, uint _secretCode) private {
-        require(_secretCode == secretCodeWhitelist, "Invalid secret code.");
-        giveWhitelistId();
-        _approve(_admin, _whitelister, 100);
-        transferFrom(_admin, _whitelister, 100);
-    }
-
     /* Drinkers need to stake a minimum happy hour fee in order to start earning $HOUR. Minimum happy hour fee may be adjusted. */
 
     function setHappyHourFee(uint _fee) external onlyOwner {
         happyHourFee = _fee;
+    }
+
+    /* Each Drinker is designated an ID in order to keep track of current hours accumulated per Drinker during 1 session. */
+
+    mapping(address => uint256) public drinkingID;
+    uint256 drinkingIDcounter;
+
+    event createdDrinkingID(address user, uint256 id);
+
+    function givePoolDrinkingId() internal returns (uint256)  { 
+        require(drinkingID[msg.sender]==0, "You are already drinking.");
+        drinkingIDcounter += 1;
+        drinkingID[msg.sender] = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender)));
+        emit createdDrinkingID(msg.sender,drinkingID[msg.sender]);
+        return drinkingID[msg.sender];
+    }
+
+    function nullPoolDrinkingId() internal {
+        require(drinkingID[msg.sender] != 0, "You haven't started drinking yet.");
+        drinkingIDcounter -= 1;
+        drinkingID[msg.sender] = 0;
+    }
+
+    function getPoolDrinkingId() public view returns(uint256) {
+        return drinkingID[msg.sender];
+    }
+
+    function getNumberOfCurrentDrinkers() public view returns(uint) {
+        return drinkingIDcounter;
     }
 
     /* Start earning $HOUR function. Requires a minimum happy hour fee stake, the PDE's PDEid and its Access Code. */
@@ -224,6 +161,7 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
         address PDEcommission;
         require(msg.sender == wiped);
         timeOUT = block.timestamp;
+        hoursSpentDrinking = (timeOUT - timeIN) / 60 / 60;
 
         for (uint i = 0; i < pdes.length; i++) {
             if (pdes[i]._PDEid == drinkingIDtoPDEid[drinkingID[msg.sender]]) {
@@ -231,15 +169,27 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
             }
         }
 
-        nullPoolDrinkingId();
-        happyHourFeePool -= 1;
-        wiped.transfer(happyHourFee * (10 ** 16));
-        hoursSpentDrinking = (timeOUT - timeIN) / 60 / 60;
-        uint HOURearned = hoursSpentDrinking * (HOURperhour * (10 ** 18));
-        uint PDEcommissionEarned = HOURearned / PDEcommissionRate;
-        _mint(wiped, HOURearned);
-        _mint(PDEcommission, PDEcommissionEarned);
-        emit endHOURresults(hoursSpentDrinking, HOURearned, PDEcommissionEarned);
+        if (hoursSpentDrinking < 8) {
+            nullPoolDrinkingId();
+            happyHourFeePool -= 1;
+            wiped.transfer(happyHourFee * (10 ** 16));
+            uint HOURearned = hoursSpentDrinking * (HOURperhour * (10 ** 18));
+            uint PDEcommissionEarned = HOURearned / PDEcommissionRate;
+            _mint(wiped, HOURearned);
+            _mint(PDEcommission, PDEcommissionEarned);
+            emit endHOURresults(hoursSpentDrinking, HOURearned, PDEcommissionEarned);
+        } else {
+            nullPoolDrinkingId();
+            happyHourFeePool -= 1;
+            wiped.transfer(happyHourFee * (10 ** 16));
+            uint PDEcommissionEarned = (HOURperhour * (10 ** 18)) / PDEcommissionRate;
+            uint penalHOURearned = HOURperhour * (10 ** 18);
+            _mint(wiped, penalHOURearned);
+            _mint(PDEcommission, PDEcommissionEarned);
+            emit endHOURresults(hoursSpentDrinking, penalHOURearned, PDEcommissionEarned);
+        }
+
+        
     }
 
     /* Adjustable earned $HOUR/hour rate */
@@ -251,5 +201,6 @@ contract HappyHourProtocolv2 is ERC20, Ownable, WhitelistID, poolDrinkingID {
     receive() external payable {}
 
 }
+
 
 

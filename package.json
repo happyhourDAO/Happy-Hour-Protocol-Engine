@@ -1,33 +1,23 @@
 {
-  "name": "truffle-test-1",
+  "name": "Happy-Hour-Protocol-Engine",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "truffle-config.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "start": "node app.js",
-    "watch": "nodemon app",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/happyhourDAO/Happy-Hour-Protocol-Engine.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.6.0",
-    "@truffle/hdwallet-provider": "^2.0.9",
-    "chai": "^4.3.6",
-    "chai-as-promised": "^7.1.1",
-    "chai-bn": "^0.3.1",
-    "csurf": "^1.11.0",
-    "dotenv": "^16.0.1",
-    "ejs": "^3.1.8",
-    "express": "^4.18.1",
-    "express-session": "^1.17.3",
-    "nodemon": "^2.0.16"
+  "bugs": {
+    "url": "https://github.com/happyhourDAO/Happy-Hour-Protocol-Engine/issues"
   },
-  "devDependencies": {
-    "@openzeppelin/test-helpers": "^0.5.15"
-  }
+  "homepage": "https://github.com/happyhourDAO/Happy-Hour-Protocol-Engine#readme"
 }
