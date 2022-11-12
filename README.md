@@ -2,9 +2,17 @@
 
 ### _A community owned Drink-To-Earn decentralized network for web3._
 
-## Abstract
+## Updates
 
-\*As of this commit, v3 has been merged and deployed to the Goerli testnet.
+As of this commit, v3 has been successfully approved through PR #2 and merged.
+
+Verified contracts deployed to the Goerli testnet ready for read and write functionality.
+
+Happy Hour Token v3: https://goerli.etherscan.io/address/0x55f8558d9b7dfffa286015b8376db1a50a0c4ff9
+
+Drunk Governance Token v3: https://goerli.etherscan.io/address/0x89f1a702eecfb47cf9289b3481349e1f38367c44
+
+## Abstract
 
 Food & Beverage (F&B) establishments have been hit hard during the past 2 years of the global pandemic. Many were shuttered in the face of government imposed lockdowns and social distancing measures. The usual bar goers resorted to at-home drinking with many setting up their own makeshift bar to emulate the feeling of going out. The customary happy hour slowly faded away as friends and colleagues were no longer able to drink together in person and enjoy one’s company.
 
