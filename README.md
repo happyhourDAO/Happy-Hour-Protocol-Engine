@@ -4,6 +4,8 @@
 
 ## Abstract
 
+\*As of this commit, v3 has been merged and deployed to the Goerli testnet.
+
 Food & Beverage (F&B) establishments have been hit hard during the past 2 years of the global pandemic. Many were shuttered in the face of government imposed lockdowns and social distancing measures. The usual bar goers resorted to at-home drinking with many setting up their own makeshift bar to emulate the feeling of going out. The customary happy hour slowly faded away as friends and colleagues were no longer able to drink together in person and enjoy one’s company.
 
 But as we see the global economy slowly opening back up with pandemic restrictions becoming obsolete, people are starting to go back to normal. But it’s not the same anymore. Favorite bars and nightlife venues are no longer around. It’s safe to say the F&B industry is still struggling.
