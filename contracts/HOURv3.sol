@@ -9,7 +9,7 @@ interface IDRNKtoken {
     function mintDRNK(address to, uint amount) external;
 }
 
-/* Main Happy Hour Protocol v2 Engine Contract */
+/* Main Happy Hour Protocol v3 Engine Contract */
 
 contract HappyHourProtocolv3 is ERC20, Ownable {
 
@@ -22,7 +22,7 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
     uint PDEcommissionRate = 10;
     uint HOURperhour = 100;
 
-    event endHOURresults(uint hoursSpentDrinking, uint HOURearned, uint PDEcommissionEarned);
+    event endHOURresults(uint hoursSpentDrinking, uint HOURearned, uint PDEcommissionEarned, uint PDEindex);
     event newPDEonboarded(string _name, string _location, address _address, uint _PDEid, uint PDEindexNum, uint accessCode);
     event newDRNKminted(uint HOURburned, uint DRNKminted);
 
@@ -41,7 +41,7 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
     mapping (uint => address) public PDEtoOwner;
     mapping (uint => uint) public drinkingIDtoPDEid;
 
-    /* Initializing the HappyHourProtocolv2 contract */
+    /* Initializing the HappyHourProtocolv3 contract */
 
     constructor() ERC20('Happy Hour Token v3', 'HOUR') {
         _mint(msg.sender, 1 * (10 ** 18));
@@ -56,6 +56,10 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
         uint PDEindexNum = pdes.length - 1;
         PDEtoOwner[PDEindexNum] = msg.sender;
         emit newPDEonboarded(_name, _location, _address, PDEid, PDEindexNum, _accessCode);
+    }
+
+    function totalPDE() public view returns (uint) {
+        return pdes.length;
     }
 
     /* Enables PDEs to change their Access Code anytime */
@@ -130,17 +134,15 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
 
     function startHOUR(uint _PDEid, uint _accessCode) public payable {
 
-        uint validPDE;
+        bool validPDE = false;
 
         for (uint i = 0; i < pdes.length; i++) {
             if (pdes[i]._PDEid == _PDEid && pdes[i]._accessCode == _accessCode) {
-                validPDE = 1;
-            } else {
-                validPDE = 0;
+                validPDE = true;
             }
         }
 
-        require(validPDE == 1);
+        require(validPDE == true);
         require(msg.value == happyHourFee * (10 ** 16), "Invalid Happy Hour Fee.");
         givePoolDrinkingId();
         drinkingIDtoPDEid[drinkingID[msg.sender]] = _PDEid;
@@ -158,6 +160,7 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
 
     function endHOUR(address payable wiped) public {
 
+        uint PDEindex;
         address PDEcommission;
         require(msg.sender == wiped);
         timeOUT = block.timestamp;
@@ -166,6 +169,7 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
         for (uint i = 0; i < pdes.length; i++) {
             if (pdes[i]._PDEid == drinkingIDtoPDEid[drinkingID[msg.sender]]) {
                 PDEcommission = pdes[i]._address;
+                PDEindex = i;
             }
         }
 
@@ -177,7 +181,7 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
             uint PDEcommissionEarned = HOURearned / PDEcommissionRate;
             _mint(wiped, HOURearned);
             _mint(PDEcommission, PDEcommissionEarned);
-            emit endHOURresults(hoursSpentDrinking, HOURearned, PDEcommissionEarned);
+            emit endHOURresults(hoursSpentDrinking, HOURearned, PDEcommissionEarned, PDEindex);
         } else {
             nullPoolDrinkingId();
             happyHourFeePool -= 1;
@@ -186,7 +190,7 @@ contract HappyHourProtocolv3 is ERC20, Ownable {
             uint penalHOURearned = HOURperhour * (10 ** 18);
             _mint(wiped, penalHOURearned);
             _mint(PDEcommission, PDEcommissionEarned);
-            emit endHOURresults(hoursSpentDrinking, penalHOURearned, PDEcommissionEarned);
+            emit endHOURresults(hoursSpentDrinking, penalHOURearned, PDEcommissionEarned, PDEindex);
         }
 
         
