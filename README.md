@@ -8,7 +8,7 @@ As of this commit, v3 has been successfully approved through PR #2 and merged.
 
 Verified contracts deployed to the Goerli testnet ready for read and write functionality.
 
-Happy Hour Token v3: https://goerli.etherscan.io/address/0x55f8558d9b7dfffa286015b8376db1a50a0c4ff9
+Happy Hour Token v3: https://goerli.etherscan.io/address/0x6e164B660fc4e6bB0298bAE28D62622E47C2C834
 
 Drunk Governance Token v3: https://goerli.etherscan.io/address/0x89f1a702eecfb47cf9289b3481349e1f38367c44
 
